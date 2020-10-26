@@ -1,6 +1,7 @@
 package clientHandling
 
 import (
+	"container/list"
 	"fmt"
 	"net"
 	"sync"
@@ -14,30 +15,48 @@ type clientInfo struct {
 }
 
 type clientMgr struct {
-	clientList []clientInfo
+	clientList *list.List
 	mutex      *sync.Mutex
+
+	imsi map[string]*clientInfo
 }
 
 func (c *clientMgr) reArrange() {
 	now := time.Now()
-	for i := 0; i < len(c.clientList); i++ {
-		fmt.Printf("[clientMgr/reArrange] (%d)\n", i)
-		fmt.Println("[clientMgr/reArrange] time: ", c.clientList[i].updatedTime)
+	defer c.mutex.Unlock()
+	c.mutex.Lock()
+	for e := c.clientList.Front(); e != nil; e = e.Next() {
+		v := e.Value.(*clientInfo)
+		fmt.Println("[clientMgr/reArrange] time: ", v.updatedTime)
 
-		elapsed := now.Sub(c.clientList[i].updatedTime)
+		elapsed := now.Sub(v.updatedTime)
 		fmt.Println("[clientMgr/reArrange] elapsed: ", elapsed)
+
+		if int(elapsed.Seconds()) > 10 {
+			fmt.Println("[clientMgr/reArrange] TIMEOUT")
+			c.remove(e, v.imsi)
+		}
 	}
 }
 
 func (c *clientMgr) print() {
-	for i := 0; i < len(c.clientList); i++ {
-		fmt.Printf("[clientMgr/print] (%d)\n", i)
-		fmt.Println("[clientMgr/print] time: ", c.clientList[i].updatedTime)
+	defer c.mutex.Unlock()
+	c.mutex.Lock()
+	for e := c.clientList.Front(); e != nil; e = e.Next() {
+		v := e.Value.(*clientInfo)
+		fmt.Println("[clientMgr/reArrange] time: ", v.updatedTime)
+	}
+
+	for key, element := range c.imsi {
+		fmt.Println("Key: ", key, " => ", "Element: ", element)
+		fmt.Println("updated time: ", element.updatedTime)
+		fmt.Println("updated imsi: ", element.imsi)
 	}
 }
 
-func (c *clientMgr) remove(pos int) {
-
+func (c *clientMgr) remove(element *list.Element, imsi string) {
+	delete(c.imsi, imsi)
+	c.clientList.Remove(element)
 }
 
 func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
@@ -46,13 +65,18 @@ func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
 		return false
 	}
 
-	client := clientInfo{
-		updatedTime: time.Now(),
-	}
+	fmt.Println("[insert] imsi: ", imsi)
+	fmt.Println("[insert] seq: ", seq)
 
-	defer c.mutex.Unlock()
+	client := new(clientInfo)
+	client.updatedTime = time.Now()
+	client.imsi = imsi
+	client.addr = addr
+
 	c.mutex.Lock()
-	c.clientList = append(c.clientList, client)
+	c.clientList.PushBack(client)
+	c.imsi[imsi] = client
+	c.mutex.Unlock()
 
 	c.print()
 
@@ -60,8 +84,9 @@ func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
 }
 
 func (c *clientMgr) init() {
-	c.clientList = make([]clientInfo, 0, 1024)
+	c.clientList = list.New()
 	c.mutex = &sync.Mutex{}
+	c.imsi = make(map[string]*clientInfo)
 }
 
 /*----------------------------------------------------------------------------*/
@@ -75,7 +100,7 @@ func Init() {
 
 func watcher() {
 	for {
-		time.Sleep(1 * time.Second)
+		time.Sleep(3 * time.Second)
 		fmt.Println("[watcher] ... ing ...")
 		cMgr.reArrange()
 	}
