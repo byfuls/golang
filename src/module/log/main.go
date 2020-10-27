@@ -11,6 +11,7 @@ import (
 /**********************************************************************/
 type loggingManager struct {
 	directory string
+	date      string
 	fileName  string
 	fullPath  string
 	file      *os.File
@@ -31,6 +32,7 @@ func (l *loggingManager) attachFp() {
 		l.file.Close()
 	}
 
+	fmt.Printf("[attach/fullPath] %s\n", l.fullPath)
 	fp, err := os.OpenFile(l.fullPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
@@ -46,7 +48,8 @@ func (l *loggingManager) attachFp() {
 func (l *loggingManager) getToday() (string, bool) {
 	date := time.Now().Format("20060102")
 
-	if l.directory != date {
+	fmt.Printf("[%s] [%s]\n", l.date, date)
+	if l.date != date {
 		return date, true
 	}
 
@@ -57,8 +60,8 @@ func (l *loggingManager) prep() {
 	if date, status := l.getToday(); status {
 		defer l.mutex.Unlock()
 		l.mutex.Lock()
-		l.directory = date
-		l.fullPath = date + "/" + l.file
+		l.date = date
+		l.fullPath = l.directory + "/" + date + "/" + l.fileName
 		l.attachFp()
 	}
 }
@@ -115,28 +118,43 @@ func errorLn(v ...interface{}) {
 	loggingMgr.error.Println(v...)
 }
 
-func Init() {
+func Init(base string) bool {
+	if 0 >= len(base) {
+		return false
+	}
+
 	loggingMgr = new(loggingManager)
 	loggingMgr.mutex = &sync.Mutex{}
 
-	directory := time.Now().Format("20060102")
+	directory := base
+	date := time.Now().Format("20060102")
 	file := "loggingTest"
+	fullPath := base + "/" + date
 
-	if err := os.MkdirAll(directory, 0755); err != nil {
-		panic(err)
+	fmt.Println(fullPath)
+	if err := os.MkdirAll(fullPath, 0755); err != nil {
+		return false
 	}
 
 	loggingMgr.directory = directory
+	loggingMgr.date = date
 	loggingMgr.fileName = file
-	loggingMgr.fullPath = directory + "/" + file
+	loggingMgr.fullPath = fullPath + "/" + file
 	fmt.Println(loggingMgr.fullPath)
-	fmt.Printf("%s", loggingMgr.fullPath)
+	fmt.Printf("[full path] %s\n", loggingMgr.fullPath)
 
 	loggingMgr.attachFp()
+
+	return true
 }
 
 func main() {
-	Init()
+	baseDir := os.Getenv("LOG_DIRECTORY")
+	fmt.Println(baseDir)
+
+	if !Init(baseDir) {
+		return
+	}
 
 	traceLn("HI")
 	infoLn("HI")
