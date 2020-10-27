@@ -18,20 +18,28 @@ type clientPacket struct {
 
 func writer(hTow chan clientPacket) {
 	fmt.Println("writer start")
+
+	for {
+		clientPacket := <-hTow
+
+		fmt.Println(clientPacket)
+		fmt.Printf("[writer] Client address: %v\n", clientPacket.addr)
+		fmt.Printf("[writer] Received bytes [%s] from socket\n", string(clientPacket.buf))
+	}
 }
 
 func handler(rToh chan clientPacket, hTow chan clientPacket, no int) {
 	fmt.Printf("handler %d ready\n", no)
 
 	for {
-		clientPacket := <-rToh
+		client := <-rToh
 
-		fmt.Println(clientPacket)
-		fmt.Printf("[handler] Client address: %v\n", clientPacket.addr)
-		fmt.Printf("[handler] Received bytes [%s] from socket\n", string(clientPacket.buf))
+		fmt.Println(client)
+		fmt.Printf("[handler] Client address: %v\n", client.addr)
+		fmt.Printf("[handler] Received bytes [%s] from socket\n", string(client.buf))
 
-		ret, pdata := simProtHandling.Parsing(clientPacket.buf)
-		pdata.Addr = *clientPacket.addr
+		ret, pdata := simProtHandling.Parsing(client.buf)
+		pdata.Addr = *client.addr
 		if ret == false {
 			fmt.Printf("[handler] parsing err")
 			continue
@@ -39,7 +47,20 @@ func handler(rToh chan clientPacket, hTow chan clientPacket, no int) {
 
 		switch pdata.Head.Command {
 		case "AS07":
-			simProtHandling.AS07(&pdata)
+			if err := simProtHandling.Recv_AS07(&pdata); err == false {
+				fmt.Println("[handler] Recv_AS07 error")
+				continue
+			}
+			if buf, len := simProtHandling.Resp_AS07(&pdata); 0 >= len {
+				fmt.Println("[handler] Resp_AS07 error")
+				continue
+			} else {
+				/* TODO TODO TODO */
+				hTow <- clientPacket{
+					addr: client.addr,
+					buf:  buf,
+				}
+			}
 		default:
 			fmt.Println("[handler] unknown command: ", pdata.Head.Command)
 		}
