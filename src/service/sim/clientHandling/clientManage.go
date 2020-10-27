@@ -12,14 +12,22 @@ type clientInfo struct {
 	updatedTime time.Time
 	imsi        string
 	addr        net.UDPAddr
+
+	gateway     string
+	gatewayAddr net.UDPAddr
 }
 
 type clientMgr struct {
 	clientList *list.List
 	mutex      *sync.Mutex
 
-	imsi map[string]*clientInfo
+	imsi    map[string]*clientInfo
+	gateway map[string]*clientInfo
 }
+
+const (
+	TIMEOUT = 30
+)
 
 func (c *clientMgr) reArrange() {
 	now := time.Now()
@@ -27,12 +35,15 @@ func (c *clientMgr) reArrange() {
 	c.mutex.Lock()
 	for e := c.clientList.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*clientInfo)
-		fmt.Println("[clientMgr/reArrange] time: ", v.updatedTime)
 
 		elapsed := now.Sub(v.updatedTime)
+		fmt.Println("[clientMgr/reArrange] time: ", v.updatedTime)
 		fmt.Println("[clientMgr/reArrange] elapsed: ", elapsed)
+		fmt.Println("[clientMgr/reArrange] gatewayAddr: ", v.gatewayAddr)
+		fmt.Println("[clientMgr/reArrange] addr: ", v.addr)
+		fmt.Println("[clientMgr/reArrange] imsi: ", v.imsi)
 
-		if int(elapsed.Seconds()) > 10 {
+		if int(elapsed.Seconds()) > TIMEOUT {
 			fmt.Println("[clientMgr/reArrange] TIMEOUT")
 			c.remove(e, v.imsi)
 		}
@@ -44,7 +55,7 @@ func (c *clientMgr) print() {
 	c.mutex.Lock()
 	for e := c.clientList.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*clientInfo)
-		fmt.Println("[clientMgr/reArrange] time: ", v.updatedTime)
+		fmt.Println("[clientMgr/print] time: ", v.updatedTime)
 	}
 
 	for key, element := range c.imsi {
@@ -54,9 +65,68 @@ func (c *clientMgr) print() {
 	}
 }
 
+func (c *clientMgr) update(imsi string) bool {
+	if 0 >= len(imsi) {
+		fmt.Println("[update-err] imsi: ", imsi)
+		return false
+	}
+
+	if client := c.imsi[imsi]; client != nil {
+		client.updatedTime = time.Now()
+		fmt.Println("[update] complete, imsi: ", imsi)
+		return true
+	}
+
+	return false
+}
+
 func (c *clientMgr) remove(element *list.Element, imsi string) {
 	delete(c.imsi, imsi)
 	c.clientList.Remove(element)
+}
+
+func (c *clientMgr) findViaGateway(gateway string) *clientInfo {
+	if 0 >= len(gateway) {
+		fmt.Println("[findViaGateway-err] gateway: ", gateway)
+		return nil
+	}
+
+	client := c.gateway[gateway]
+	if client == nil {
+		fmt.Println("[findViaGateway-err] find error, gateway: ", gateway)
+		return nil
+	}
+
+	return c.gateway[gateway]
+}
+
+func (c *clientMgr) findViaImsi(imsi string) *clientInfo {
+	if 0 >= len(imsi) {
+		fmt.Println("[findViaImsi-err] imsi: ", imsi)
+		return nil
+	}
+
+	return c.imsi[imsi]
+}
+
+func (c *clientMgr) mapping(addr net.UDPAddr, gateway string, imsi string) bool {
+	if 0 >= len(gateway) || 0 >= len(imsi) {
+		fmt.Println("[mapping-err] gateway: ", gateway)
+		return false
+	}
+
+	defer c.mutex.Unlock()
+	c.mutex.Lock()
+	client := c.findViaImsi(imsi)
+	if client == nil {
+		fmt.Println("[mapping-err] not found client info via imsi: ", imsi)
+		return false
+	}
+	client.gateway = gateway
+	client.gatewayAddr = addr
+	c.gateway[gateway] = client
+
+	return true
 }
 
 func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
@@ -65,8 +135,8 @@ func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
 		return false
 	}
 
-	fmt.Println("[insert] imsi: ", imsi)
-	fmt.Println("[insert] seq: ", seq)
+	//fmt.Println("[insert] imsi: ", imsi)
+	//fmt.Println("[insert] seq: ", seq)
 
 	client := new(clientInfo)
 	client.updatedTime = time.Now()
@@ -78,7 +148,7 @@ func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
 	c.imsi[imsi] = client
 	c.mutex.Unlock()
 
-	c.print()
+	//c.print()
 
 	return true
 }
@@ -87,6 +157,7 @@ func (c *clientMgr) init() {
 	c.clientList = list.New()
 	c.mutex = &sync.Mutex{}
 	c.imsi = make(map[string]*clientInfo)
+	c.gateway = make(map[string]*clientInfo)
 }
 
 /*----------------------------------------------------------------------------*/
@@ -106,6 +177,30 @@ func watcher() {
 	}
 }
 
+func Update(imsi string) bool {
+	return cMgr.update(imsi)
+}
+
+func GetMappedAddressNGatewayViaImsi(imsi string) (bool, net.UDPAddr, string) {
+	client := cMgr.findViaImsi(imsi)
+	if client != nil {
+		return true, client.addr, client.gateway
+	}
+	return false, client.addr, client.gateway
+}
+
+func GetMappedAddressNImsiViaGateway(gateway string) (bool, net.UDPAddr, string) {
+	client := cMgr.findViaGateway(gateway)
+	if client != nil {
+		return true, client.addr, client.imsi
+	}
+	return false, client.addr, client.imsi
+}
+
 func Insert(addr net.UDPAddr, imsi string, seq uint32) bool {
 	return cMgr.insert(addr, imsi, seq)
+}
+
+func Mapping(addr net.UDPAddr, gateway string, imsi string) bool {
+	return cMgr.mapping(addr, gateway, imsi)
 }

@@ -9,7 +9,7 @@ import (
 
 type header struct {
 	Command string
-	Imsi    string
+	Key     string // IMSI or GATEWAY
 	Seq     uint32
 	Rev     uint32
 }
@@ -23,7 +23,7 @@ type parsedData struct {
 const (
 	HEADER  = 32
 	COMMAND = 4
-	IMSI    = 20
+	KEY     = 20
 	SEQ     = 4
 	REV     = 4
 )
@@ -39,8 +39,8 @@ func Parsing(buf []byte) (bool, parsedData) {
 	pos := 0
 	pdata.Head.Command = string(buf[0:COMMAND])
 	pos += COMMAND
-	pdata.Head.Imsi = string(buf[pos : pos+IMSI])
-	pos += IMSI
+	pdata.Head.Key = string(buf[pos : pos+KEY])
+	pos += KEY
 	pdata.Head.Seq = binary.BigEndian.Uint32(buf[pos : pos+SEQ])
 	pos += SEQ
 	pdata.Head.Rev = binary.BigEndian.Uint32(buf[pos : pos+REV])
@@ -54,7 +54,7 @@ func Parsing(buf []byte) (bool, parsedData) {
 	}
 
 	fmt.Printf("[parsing] command: %s\n", pdata.Head.Command)
-	fmt.Printf("[parsing] imsi: %s\n", pdata.Head.Imsi)
+	fmt.Printf("[parsing] key: %s\n", pdata.Head.Key)
 	fmt.Printf("[parsing] seq: %d\n", pdata.Head.Seq)
 	fmt.Printf("[parsing] rev: %d\n", pdata.Head.Rev)
 
