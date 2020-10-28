@@ -2,10 +2,11 @@ package clientHandling
 
 import (
 	"container/list"
-	"fmt"
 	"net"
 	"sync"
 	"time"
+
+	"module/logging"
 )
 
 type clientInfo struct {
@@ -35,16 +36,16 @@ func (c *clientMgr) reArrange() {
 	c.mutex.Lock()
 	for e := c.clientList.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*clientInfo)
-
 		elapsed := now.Sub(v.updatedTime)
-		fmt.Println("[clientMgr/reArrange] time: ", v.updatedTime)
-		fmt.Println("[clientMgr/reArrange] elapsed: ", elapsed)
-		fmt.Println("[clientMgr/reArrange] gatewayAddr: ", v.gatewayAddr)
-		fmt.Println("[clientMgr/reArrange] addr: ", v.addr)
-		fmt.Println("[clientMgr/reArrange] imsi: ", v.imsi)
+
+		logging.DebugLn("[clientMgr/reArrange] time: ", v.updatedTime)
+		logging.DebugLn("[clientMgr/reArrange] elapsed: ", elapsed)
+		logging.DebugLn("[clientMgr/reArrange] gatewayAddr: ", v.gatewayAddr)
+		logging.DebugLn("[clientMgr/reArrange] addr: ", v.addr)
+		logging.DebugLn("[clientMgr/reArrange] imsi: ", v.imsi)
 
 		if int(elapsed.Seconds()) > TIMEOUT {
-			fmt.Println("[clientMgr/reArrange] TIMEOUT")
+			logging.TraceLn("[clientMgr/reArrange] TIMEOUT")
 			c.remove(e, v.imsi)
 		}
 	}
@@ -55,25 +56,29 @@ func (c *clientMgr) print() {
 	c.mutex.Lock()
 	for e := c.clientList.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*clientInfo)
-		fmt.Println("[clientMgr/print] time: ", v.updatedTime)
+
+		logging.TraceLn("[clientMgr/reArrange] time: ", v.updatedTime)
+		logging.TraceLn("[clientMgr/reArrange] gatewayAddr: ", v.gatewayAddr)
+		logging.TraceLn("[clientMgr/reArrange] addr: ", v.addr)
+		logging.TraceLn("[clientMgr/reArrange] imsi: ", v.imsi)
 	}
 
 	for key, element := range c.imsi {
-		fmt.Println("Key: ", key, " => ", "Element: ", element)
-		fmt.Println("updated time: ", element.updatedTime)
-		fmt.Println("updated imsi: ", element.imsi)
+		logging.TraceLn("Key: ", key, " => ", "Element: ", element)
+		logging.TraceLn("updated time: ", element.updatedTime)
+		logging.TraceLn("updated imsi: ", element.imsi)
 	}
 }
 
 func (c *clientMgr) update(imsi string) bool {
 	if 0 >= len(imsi) {
-		fmt.Println("[update-err] imsi: ", imsi)
+		logging.ErrorLn("[update-err] imsi: ", imsi)
 		return false
 	}
 
 	if client := c.imsi[imsi]; client != nil {
 		client.updatedTime = time.Now()
-		fmt.Println("[update] complete, imsi: ", imsi)
+		logging.DebugLn("[update] complete, imsi: ", imsi)
 		return true
 	}
 
@@ -87,13 +92,13 @@ func (c *clientMgr) remove(element *list.Element, imsi string) {
 
 func (c *clientMgr) findViaGateway(gateway string) *clientInfo {
 	if 0 >= len(gateway) {
-		fmt.Println("[findViaGateway-err] gateway: ", gateway)
+		logging.ErrorLn("[findViaGateway-err] gateway: ", gateway)
 		return nil
 	}
 
 	client := c.gateway[gateway]
 	if client == nil {
-		fmt.Println("[findViaGateway-err] find error, gateway: ", gateway)
+		logging.ErrorLn("[findViaGateway-err] find error, gateway: ", gateway)
 		return nil
 	}
 
@@ -102,7 +107,7 @@ func (c *clientMgr) findViaGateway(gateway string) *clientInfo {
 
 func (c *clientMgr) findViaImsi(imsi string) *clientInfo {
 	if 0 >= len(imsi) {
-		fmt.Println("[findViaImsi-err] imsi: ", imsi)
+		logging.ErrorLn("[findViaImsi-err] imsi: ", imsi)
 		return nil
 	}
 
@@ -111,7 +116,7 @@ func (c *clientMgr) findViaImsi(imsi string) *clientInfo {
 
 func (c *clientMgr) mapping(addr net.UDPAddr, gateway string, imsi string) bool {
 	if 0 >= len(gateway) || 0 >= len(imsi) {
-		fmt.Println("[mapping-err] gateway: ", gateway)
+		logging.ErrorLn("[mapping-err] gateway: ", gateway)
 		return false
 	}
 
@@ -119,7 +124,7 @@ func (c *clientMgr) mapping(addr net.UDPAddr, gateway string, imsi string) bool 
 	c.mutex.Lock()
 	client := c.findViaImsi(imsi)
 	if client == nil {
-		fmt.Println("[mapping-err] not found client info via imsi: ", imsi)
+		logging.ErrorLn("[mapping-err] not found client info via imsi: ", imsi)
 		return false
 	}
 	client.gateway = gateway
@@ -131,12 +136,9 @@ func (c *clientMgr) mapping(addr net.UDPAddr, gateway string, imsi string) bool 
 
 func (c *clientMgr) insert(addr net.UDPAddr, imsi string, seq uint32) bool {
 	if 0 >= len(imsi) {
-		fmt.Println("[insert-err] imsi: ", imsi)
+		logging.ErrorLn("[insert-err] imsi: ", imsi)
 		return false
 	}
-
-	//fmt.Println("[insert] imsi: ", imsi)
-	//fmt.Println("[insert] seq: ", seq)
 
 	client := new(clientInfo)
 	client.updatedTime = time.Now()
@@ -172,7 +174,7 @@ func Init() {
 func watcher() {
 	for {
 		time.Sleep(3 * time.Second)
-		fmt.Println("[watcher] ... ing ...")
+		logging.TraceLn("[watcher] re-arrange start")
 		cMgr.reArrange()
 	}
 }
