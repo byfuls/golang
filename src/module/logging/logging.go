@@ -41,11 +41,11 @@ func (l *loggingManager) attachFp() {
 
 	l.file = fp
 	/* log.Llongfile || log.Lshortfile */
-	l.debug = log.New(loggingMgr.file, "[DEBUG] ", log.Ldate|log.Ltime|log.Lmicroseconds)
-	l.trace = log.New(loggingMgr.file, "[TRACE] ", log.Ldate|log.Ltime|log.Lmicroseconds)
-	l.info = log.New(loggingMgr.file, "[INFO] ", log.Ldate|log.Ltime|log.Lmicroseconds)
-	l.warn = log.New(loggingMgr.file, "[WARN]  ", log.Ldate|log.Ltime|log.Lmicroseconds)
-	l.error = log.New(loggingMgr.file, "[ERROR] ", log.Ldate|log.Ltime|log.Lmicroseconds)
+	l.debug = log.New(l.file, "[DEBUG] ", log.Ldate|log.Ltime|log.Lmicroseconds)
+	l.trace = log.New(l.file, "[TRACE] ", log.Ldate|log.Ltime|log.Lmicroseconds)
+	l.info = log.New(l.file, "[INFO] ", log.Ldate|log.Ltime|log.Lmicroseconds)
+	l.warn = log.New(l.file, "[WARN]  ", log.Ldate|log.Ltime|log.Lmicroseconds)
+	l.error = log.New(l.file, "[ERROR] ", log.Ldate|log.Ltime|log.Lmicroseconds)
 
 }
 
@@ -65,7 +65,12 @@ func (l *loggingManager) prep() {
 		defer l.mutex.Unlock()
 		l.mutex.Lock()
 		l.date = date
-		l.fullPath = l.directory + "/" + date + "/" + l.fileName
+
+		l.fullPath = l.directory + "/" + date
+		if err := os.MkdirAll(l.fullPath, 0755); err != nil {
+			panic(err)
+		}
+		l.fullPath += "/" + l.fileName
 		l.attachFp()
 	}
 }

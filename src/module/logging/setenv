@@ -1,1 +1,0 @@
-export LOG_DIRECTORY=${HOME}/Lab/golang/src/module/log/output
