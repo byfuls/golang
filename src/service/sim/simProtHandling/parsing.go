@@ -2,9 +2,9 @@ package simProtHandling
 
 import (
 	"encoding/binary"
-	"encoding/hex"
-	"fmt"
 	"net"
+
+	"module/logging"
 )
 
 type header struct {
@@ -34,7 +34,6 @@ func Parsing(buf []byte) (bool, parsedData) {
 	if 0 >= len(buf) {
 		return false, pdata
 	}
-	fmt.Printf("%s\n", hex.Dump(buf))
 
 	pos := 0
 	pdata.Head.Command = string(buf[0:COMMAND])
@@ -47,16 +46,19 @@ func Parsing(buf []byte) (bool, parsedData) {
 	pos += REV
 
 	switch pdata.Head.Command {
-	case "AS07":
+	case "AS07", "AA00", "AS03", "AS90":
 		break
+	case "MA06", "AC03":
+		pdata.Body = buf[pos:]
 	default:
-		fmt.Println("[parsing] unknown command received, command: ", pdata.Head.Command)
+		logging.ErrorLn("[parsing] unknown command received, command: ", pdata.Head.Command)
+		return false, pdata
 	}
 
-	fmt.Printf("[parsing] command: %s\n", pdata.Head.Command)
-	fmt.Printf("[parsing] key: %s\n", pdata.Head.Key)
-	fmt.Printf("[parsing] seq: %d\n", pdata.Head.Seq)
-	fmt.Printf("[parsing] rev: %d\n", pdata.Head.Rev)
+	logging.DebugF("[parsing] command: %s\n", pdata.Head.Command)
+	logging.DebugF("[parsing] key: %s\n", pdata.Head.Key)
+	logging.DebugF("[parsing] seq: %d\n", pdata.Head.Seq)
+	logging.DebugF("[parsing] rev: %d\n", pdata.Head.Rev)
 
 	return true, pdata
 }

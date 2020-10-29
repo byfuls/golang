@@ -3,15 +3,14 @@ package simProtHandling
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
-	"service/sim/clientHandling"
 
+	"service/sim/clientHandling"
 	"module/logging"
 )
 
 /*************************************************************************************/
 func Recv_AS90(pdata *parsedData) bool {
-	logging.DebugLn("[Recv_AS90] start")
+	logging.DebugF("[Recv_AS90] start, imsi[%d:%s]", len(pdata.Head.Key), pdata.Head.Key)
 
 	if ret := clientHandling.Update(pdata.Head.Key); !ret {
 		logging.ErrorLn("[Recv_AS90] update error, imsi: ", pdata.Head.Key)
@@ -184,8 +183,7 @@ func Send_LUR(pdata *parsedData) ([]byte, int) {
 }
 
 func Recv_AS07(pdata *parsedData) bool {
-	logging.DebugLn("[Recv_AS07] start")
-	fmt.Println(pdata)
+	logging.DebugF("[Recv_AS07] start, imsi[%d:%s]", len(pdata.Head.Key), pdata.Head.Key)
 	if ret := clientHandling.Insert(pdata.Addr, pdata.Head.Key, pdata.Head.Seq); ret == false {
 		logging.ErrorLn("[AS07] insert error")
 		return false
@@ -196,6 +194,8 @@ func Recv_AS07(pdata *parsedData) bool {
 
 func Resp_AS07(pdata *parsedData) ([]byte, int) {
 	logging.DebugLn("[Resp_AS07] start")
+
+	lurInterval := 60
 
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.BigEndian, []byte(pdata.Head.Command)); err != nil {
@@ -213,6 +213,10 @@ func Resp_AS07(pdata *parsedData) ([]byte, int) {
 	if err := binary.Write(buf, binary.BigEndian, pdata.Head.Rev); err != nil {
 		logging.ErrorLn("[Resp_AS07] error: ", err)
 		return nil, -4
+	}
+	if err := binary.Write(buf, binary.BigEndian, uint32(lurInterval)); err != nil {
+		logging.ErrorLn("[Resp_AS07] error: ", err)
+		return nil, -5
 	}
 
 	logging.DebugLn(buf.Bytes())

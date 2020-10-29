@@ -32,8 +32,7 @@ func writer(hTow chan clientPacket) {
 
 		logging.DebugLn(clientPacket)
 		logging.DebugF("[writer] Client address: %v\n", clientPacket.addr)
-		logging.DebugF("[writer] Received bytes [%s] from socket\n", string(clientPacket.buf))
-		logging.DebugF("%s\n", hex.Dump(clientPacket.buf))
+		logging.DebugF("\n%s\n", hex.Dump(clientPacket.buf))
 
 		if wsize, err := g_conn.WriteTo(clientPacket.buf, clientPacket.addr); err != nil {
 			logging.ErrorLn("[writer] write error: ", err)
@@ -51,14 +50,13 @@ func handler(rToh chan clientPacket, hTow chan clientPacket, no int) {
 
 		logging.DebugLn(client)
 		logging.DebugF("[handler] Client address: %v\n", client.addr)
-		logging.DebugF("[handler] Received bytes [%s] from socket\n", string(client.buf))
 
 		ret, pdata := simProtHandling.Parsing(client.buf)
-		pdata.Addr = *client.addr
 		if ret == false {
 			logging.ErrorLn("[handler] parsing err")
 			continue
 		}
+		pdata.Addr = *client.addr
 
 		switch pdata.Head.Command {
 		case "AS90": // from Device
@@ -188,6 +186,7 @@ func receiver(rToh chan clientPacket, ip string, port int) {
 			os.Exit(1)
 		} else {
 			logging.DebugF("Client address: %v\n", client)
+			logging.DebugF("\n%s\n", hex.Dump(buf[:rsize]))
 
 			rToh <- clientPacket{
 				addr: client,
@@ -202,7 +201,7 @@ func main() {
 	port, _ := strconv.Atoi(os.Args[2])
 	handlerCount := 5
 
-	if !logging.Init("/home/byfuls/golang/log", "sim") {
+	if !logging.Init("/home/byfuls/golang/src/service/sim/log", "sim.log") {
 		fmt.Println("logging init error")
 		return
 	}

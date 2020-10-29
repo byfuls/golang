@@ -27,27 +27,31 @@ type clientMgr struct {
 }
 
 const (
-	TIMEOUT = 30
+	TIMEOUT = 120
 )
 
 func (c *clientMgr) reArrange() {
 	now := time.Now()
 	defer c.mutex.Unlock()
 	c.mutex.Lock()
+	
+	idx := 0
+	tcnt := c.clientList.Len()
 	for e := c.clientList.Front(); e != nil; e = e.Next() {
 		v := e.Value.(*clientInfo)
 		elapsed := now.Sub(v.updatedTime)
 
-		logging.DebugLn("[clientMgr/reArrange] time: ", v.updatedTime)
-		logging.DebugLn("[clientMgr/reArrange] elapsed: ", elapsed)
-		logging.DebugLn("[clientMgr/reArrange] gatewayAddr: ", v.gatewayAddr)
-		logging.DebugLn("[clientMgr/reArrange] addr: ", v.addr)
-		logging.DebugLn("[clientMgr/reArrange] imsi: ", v.imsi)
+		logging.DebugLn("[clientMgr/reArrange] [", idx+1, "/", tcnt, "] time: ", v.updatedTime)
+		logging.DebugLn("[clientMgr/reArrange] [", idx+1, "/", tcnt, "] elapsed: ", elapsed)
+		logging.DebugLn("[clientMgr/reArrange] [", idx+1, "/", tcnt, "] gatewayAddr: ", v.gatewayAddr)
+		logging.DebugLn("[clientMgr/reArrange] [", idx+1, "/", tcnt, "] addr: ", v.addr)
+		logging.DebugLn("[clientMgr/reArrange] [", idx+1, "/", tcnt, "] imsi: ", v.imsi)
 
 		if int(elapsed.Seconds()) > TIMEOUT {
-			logging.TraceLn("[clientMgr/reArrange] TIMEOUT")
+			logging.TraceF("[clientMgr/reArrange] [%d/%d] TIMEOUT", idx+1, tcnt)
 			c.remove(e, v.imsi)
 		}
+		idx++
 	}
 }
 
@@ -80,9 +84,10 @@ func (c *clientMgr) update(imsi string) bool {
 		client.updatedTime = time.Now()
 		logging.DebugLn("[update] complete, imsi: ", imsi)
 		return true
+	} else {
+		logging.ErrorLn("[update-err] not found imsi: ", imsi)
+		return false
 	}
-
-	return false
 }
 
 func (c *clientMgr) remove(element *list.Element, imsi string) {
