@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"service/proxy/channelManager"
 )
 
 const (
@@ -52,15 +54,20 @@ func writeToCM(CMMgr *CMManage) {
 	}
 }
 
-func receiveFromCM(rToh chan bypass, cm *net.TCPConn) {
+func receiveFromCM(rToh chan bypass, cm *net.TCPConn, key string) {
 	fmt.Printf("[receiveFromCM] start addr: %v\n", cm)
 
 	buf := make([]byte, 1024)
 	for {
 		rsize, err := cm.Read(buf)
 		if err != nil || 0 >= rsize {
-			fmt.Println("[receiveFromCM] receive error: ", err)
-			return
+			if ret := channelManager.Del(key); ret {
+				fmt.Println("[receiveFromCM] receive error: ", err, "delete channel success")
+				return
+			} else {
+				fmt.Println("[receiveFromCM] receive error: ", err, "delete channel fail")
+				os.Exit(1)
+			}
 		} else {
 			fmt.Printf("[receiveFromCM] receive buf: %s\n", hex.Dump(buf[:rsize]))
 			rToh <- bypass{
@@ -92,8 +99,14 @@ func acceptFromCM(rToh chan bypass, ip string, port int) {
 			toCM:   make(chan bypass),
 		}
 
-		go receiveFromCM(rToh, cm)
-		go writeToCM(&channel)
+		fmt.Println(channel)
+		TEST_KEY := "TEST"
+		if ret := channelManager.Put(TEST_KEY, channel); ret {
+			go receiveFromCM(rToh, cm, TEST_KEY)
+			go writeToCM(&channel)
+		} else {
+			fmt.Println("[acceptFromCM] channel manager put error")
+		}
 	}
 }
 
@@ -101,9 +114,26 @@ func handler(rToh chan bypass, hTow chan bypass, no int) {
 	fmt.Printf("[handler] %d ready\n", no)
 
 	for {
-		bypass := <-rToh
+		packet := <-rToh
+		switch packet.from {
+		case CP:
+			fmt.Println("[handler] (CP) receive data")
+			fmt.Printf("[handler] receive channel: %s\n", hex.Dump(packet.buf))
 
-		fmt.Printf("[handler] receive channel: %s\n", hex.Dump(bypass.buf))
+			if tmp, ret := channelManager.Get("TEST"); ret {
+				cm := tmp.(CMManage)
+				cm.toCM <- bypass{
+					from: CP,
+					buf:  packet.buf,
+				}
+			} else {
+				fmt.Println("[handler] (CP) not found channel in map")
+				continue
+			}
+		case CM:
+			fmt.Println("[handler] (CM) receive data")
+			fmt.Printf("[handler] receive channel: %s\n", hex.Dump(packet.buf))
+		}
 	}
 }
 
@@ -156,6 +186,8 @@ func main() {
 		udp_port, _ = strconv.Atoi(os.Args[2])
 	}
 	fmt.Println(udp_ip, udp_port, tcp_ip, tcp_port)
+
+	channelManager.Init()
 
 	rToh := make(chan bypass)
 	hTow := make(chan bypass)
