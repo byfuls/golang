@@ -55,7 +55,7 @@ func writeToCM(CMMgr *CMManage) {
 }
 
 func receiveFromCM(rToh chan bypass, cm *net.TCPConn, key string) {
-	fmt.Printf("[receiveFromCM] start addr: %v\n", cm)
+	fmt.Printf("[receiveFromCM] start addr: %v [%s]\n", cm, key)
 
 	buf := make([]byte, 1024)
 	for {
@@ -92,6 +92,7 @@ func acceptFromCM(rToh chan bypass, ip string, port int) {
 		cm, err := conn.AcceptTCP()
 		if err != nil {
 			fmt.Println("[acceptFromCM] accept error: ", err)
+			continue
 		}
 
 		channel := CMManage{
@@ -118,7 +119,7 @@ func handler(rToh chan bypass, hTow chan bypass, no int) {
 		switch packet.from {
 		case CP:
 			fmt.Println("[handler] (CP) receive data")
-			fmt.Printf("[handler] receive channel: %s\n", hex.Dump(packet.buf))
+			fmt.Printf("[handler] receive channel: \n%s\n", hex.Dump(packet.buf))
 
 			if tmp, ret := channelManager.Get("TEST"); ret {
 				cm := tmp.(CMManage)
@@ -132,7 +133,7 @@ func handler(rToh chan bypass, hTow chan bypass, no int) {
 			}
 		case CM:
 			fmt.Println("[handler] (CM) receive data")
-			fmt.Printf("[handler] receive channel: %s\n", hex.Dump(packet.buf))
+			fmt.Printf("[handler] receive channel: \n%s\n", hex.Dump(packet.buf))
 		}
 	}
 }
