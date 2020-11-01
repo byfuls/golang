@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"service/protocol"
 	"service/proxy/channelManager"
 )
 
@@ -78,6 +79,26 @@ func receiveFromCM(rToh chan bypass, cm *net.TCPConn, key string) {
 	}
 }
 
+func getKeyFromCM(cm *net.TCPConn) ([]byte, bool) {
+	fmt.Println("[getKeyFromCM")
+
+	buf := make([]byte, 1024)
+	rsize, err := cm.Read(buf)
+	if err != nil || 0 >= rsize {
+		return nil, false
+	} else {
+		p := protocol.Packet{}
+		if ret := p.Parsing(buf[:rsize], uint32(rsize)); ret {
+			key, len := p.GetKey()
+			fmt.Printf("[getKeyFromCM] key:%s, len:%d\n", key, len)
+			return key, true
+		} else {
+			fmt.Println("[getKeyFromCM] protocol parsing error")
+			return nil, false
+		}
+	}
+}
+
 func acceptFromCM(rToh chan bypass, ip string, port int) {
 	fmt.Println("[acceptFromCM] start")
 
@@ -101,12 +122,15 @@ func acceptFromCM(rToh chan bypass, ip string, port int) {
 		}
 
 		fmt.Println(channel)
-		TEST_KEY := "TEST"
-		if ret := channelManager.Put(TEST_KEY, channel); ret {
-			go receiveFromCM(rToh, cm, TEST_KEY)
-			go writeToCM(&channel)
+		if key, ret := getKeyFromCM(cm); ret {
+			if ret := channelManager.Put(string(key), channel); ret {
+				go receiveFromCM(rToh, cm, string(key))
+				go writeToCM(&channel)
+			} else {
+				fmt.Println("[acceptFromCM] channel manager put error")
+			}
 		} else {
-			fmt.Println("[acceptFromCM] channel manager put error")
+			fmt.Println("[acceptFromCM] regist key error")
 		}
 	}
 }
@@ -121,14 +145,23 @@ func handler(rToh chan bypass, hTow chan bypass, no int) {
 			fmt.Println("[handler] (CP) receive data")
 			fmt.Printf("[handler] receive channel: \n%s\n", hex.Dump(packet.buf))
 
-			if tmp, ret := channelManager.Get("TEST"); ret {
-				cm := tmp.(CMManage)
-				cm.toCM <- bypass{
-					from: CP,
-					buf:  packet.buf,
+			p := protocol.Packet{}
+			if ret := p.Parsing(packet.buf, uint32(len(packet.buf))); ret {
+				key, len := p.GetKey()
+				fmt.Printf("[handler] key:%s, len:%d\n", key, len)
+
+				if tmp, ret := channelManager.Get(string(key)); ret {
+					cm := tmp.(CMManage)
+					cm.toCM <- bypass{
+						from: CP,
+						buf:  packet.buf,
+					}
+				} else {
+					fmt.Println("[handler] (CP) not found channel in map")
+					continue
 				}
 			} else {
-				fmt.Println("[handler] (CP) not found channel in map")
+				fmt.Println("[handler] protocol parsing error")
 				continue
 			}
 		case CM:

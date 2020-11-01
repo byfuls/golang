@@ -6,8 +6,6 @@ import (
 	"net"
 
 	"service/proxy/channelManager"
-
-	"service/protocol"
 )
 
 const (
@@ -23,18 +21,6 @@ type Message struct {
 type CHManage struct {
 	Socket *net.TCPConn
 	ToCH   chan Message
-}
-
-/***********************************/
-func registCM() ([]byte, uint32) {
-	p := protocol.Packet{}
-	TEST_KEY := "TEST"
-	buf, len := p.Make("CONNECTION", "REGIST", 0, len(TEST_KEY), TEST_KEY, 0, nil)
-	if 0 == len {
-		fmt.Println("[registCM] make regist protocol error")
-		return nil, 0
-	}
-	return buf, len
 }
 
 /***********************************/
