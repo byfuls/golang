@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"service/protocol"
 	"service/proxy/channelManager"
 )
 
@@ -25,42 +26,51 @@ type CHManage struct {
 
 /***********************************/
 
-func Deliver(chToDv chan Message, pxToDv chan Message, dvToPx chan Message, dvToCh chan Message) {
-	fmt.Println("[Deliver] start")
+func Deliver(chToDv chan Message, pxToDv chan Message, dvToPx chan Message, dvToCh chan Message, no int) {
+	fmt.Printf("[Deliver/%d] start\n", no)
 
 	for {
 		select {
 		case message := <-chToDv:
 			switch message.From {
 			case CH:
-				fmt.Println("[Deliver] (CH) receive data")
-				fmt.Printf("[Deliver] receive channel: \n%s\n", hex.Dump(message.Buf))
+				fmt.Printf("[Deliver/%d] (CH) receive data\n", no)
+				fmt.Printf("[Deliver/%d] receive channel: \n%s\n", no, hex.Dump(message.Buf))
 
 				dvToPx <- Message{
 					From: message.From,
 					Buf:  message.Buf,
 				}
 			default:
-				fmt.Println("[Deliver] (from Channel) unknown FromMessage error: ", message.From)
+				fmt.Printf("[Deliver/%d] (from Channel) unknown FromMessage error: %d\n", no, message.From)
 			}
 		case message := <-pxToDv:
 			switch message.From {
 			case PROXY:
-				fmt.Println("[Deliver] (PROXY) receive data")
-				fmt.Printf("[Deliver] receive channel: \n%s\n", hex.Dump(message.Buf))
+				fmt.Printf("[Deliver/%d] (PROXY) receive data\n", no)
+				fmt.Printf("[Deliver/%d] receive channel: \n%s\n", no, hex.Dump(message.Buf))
 
-				if tmp, ret := channelManager.Get("TEST"); ret {
-					ch := tmp.(CHManage)
-					ch.ToCH <- Message{
-						From: PROXY,
-						Buf:  message.Buf,
+				p := protocol.Packet{}
+				if ret := p.Parsing(message.Buf, uint32(len(message.Buf))); ret {
+					key, len := p.GetKey()
+					fmt.Printf("[Deliver/%d] key:%s, len:%d\n", no, key, len)
+
+					if tmp, ret := channelManager.Get(string(key)); ret {
+						ch := tmp.(CHManage)
+						ch.ToCH <- Message{
+							From: PROXY,
+							Buf:  message.Buf,
+						}
+					} else {
+						fmt.Printf("[Deliver/%d] (PROXY) not found channel in map\n", no)
+						continue
 					}
 				} else {
-					fmt.Println("[Deliver] (PROXY) not found channel in map")
+					fmt.Printf("[Deliver/%d] protocol parsing error\n", no)
 					continue
 				}
 			default:
-				fmt.Println("[Deliver] (from Proxy) unknown FromMessage error: ", message.From)
+				fmt.Printf("[Deliver/%d] (from Proxy) unknown FromMessage error: %d\n", no, message.From)
 			}
 		}
 	}

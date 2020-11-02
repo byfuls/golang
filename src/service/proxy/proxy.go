@@ -17,7 +17,11 @@ const (
 	DEFAULT_UDP_PORT = "10000"
 	DEFAULT_TCP_IP   = "127.0.0.1"
 	DEFAULT_TCP_PORT = "10001"
-	HANDLER_COUNT    = 1
+
+	HANDLER_COUNT = 1
+
+	CP_UDP_IP   = "127.0.0.1"
+	CP_UDP_PORT = 10010
 )
 
 const (
@@ -80,7 +84,7 @@ func receiveFromCM(rToh chan bypass, cm *net.TCPConn, key string) {
 }
 
 func getKeyFromCM(cm *net.TCPConn) ([]byte, bool) {
-	fmt.Println("[getKeyFromCM")
+	fmt.Println("[getKeyFromCM] start")
 
 	buf := make([]byte, 1024)
 	rsize, err := cm.Read(buf)
@@ -167,6 +171,24 @@ func handler(rToh chan bypass, hTow chan bypass, no int) {
 		case CM:
 			fmt.Println("[handler] (CM) receive data")
 			fmt.Printf("[handler] receive channel: \n%s\n", hex.Dump(packet.buf))
+			hTow <- bypass{
+				from: CM,
+				buf:  packet.buf,
+			}
+		}
+	}
+}
+
+func writeToCP(hTow chan bypass) {
+	fmt.Println("[writeToCP] start")
+
+	addr := net.UDPAddr{Port: CP_UDP_PORT, IP: net.ParseIP(CP_UDP_IP)}
+	for {
+		packet := <-hTow
+		if wsize, err := g_conn.WriteToUDP(packet.buf, &addr); err != nil {
+			fmt.Println("[writeToCP] write to CP error: ", err)
+		} else {
+			fmt.Println("[writeToCP] write to CP success: ", wsize)
 		}
 	}
 }
@@ -227,7 +249,7 @@ func main() {
 	hTow := make(chan bypass)
 
 	go receiveFromCP(rToh, udp_ip, udp_port)
-	//go writeToCP()
+	go writeToCP(hTow)
 
 	go acceptFromCM(rToh, tcp_ip, tcp_port)
 	for i := 0; i < HANDLER_COUNT; i++ {
