@@ -74,7 +74,7 @@ func Accepter(chToDv chan handling.Message, ip string, port int) {
 			ToCH:   make(chan handling.Message),
 		}
 
-		TEST_KEY := "TEST"
+		TEST_KEY := "51010" // TEST TEST TEST
 		if ret := channelManager.Put(TEST_KEY, channel); ret {
 			go channelReceiver(chToDv, ch, TEST_KEY)
 			go channelWriter(&channel)

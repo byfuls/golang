@@ -4,24 +4,21 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net"
-	"os"
 	"time"
 
 	"service/cm/handling"
 	"service/protocol"
 )
 
-//func regist() {
-//	/* TODO TODO TODO */
-//	fmt.Println("[regist] start")
-//
-//	return []byte("[regist] TEST")
-//}
+type proxyStatus struct {
+	connFlag bool
+	proxy    *net.TCPConn
+}
 
 /***********************************/
 func registCM() ([]byte, uint32) {
 	p := protocol.Packet{}
-	TEST_KEY := "TEST"
+	TEST_KEY := "51010" // TEST TEST TEST
 	buf, len := p.Make("CONNECTION", "REGIST", 0, uint8(len(TEST_KEY)), []byte(TEST_KEY), 0, nil)
 	if 0 == len {
 		fmt.Println("[registCM] make regist protocol error")
@@ -30,15 +27,16 @@ func registCM() ([]byte, uint32) {
 	return buf, len
 }
 
-func proxyReceiver(proxy *net.TCPConn, pxToDv chan handling.Message) {
+func proxyReceiver(pxy *proxyStatus, pxToDv chan handling.Message) {
 	fmt.Println("[proxyReceiver] start")
 
 	buf := make([]byte, 1024)
 	for {
-		rsize, err := proxy.Read(buf)
+		rsize, err := pxy.proxy.Read(buf)
 		if err != nil || 0 >= rsize {
-			/* TODO TODO TODO */
-			fmt.Println("[proxyReceiver] proxy socket disconnected: ", err)
+			fmt.Println("[proxyReceiver] proxy socket disconnected: ", err, "back to connect")
+			pxy.connFlag = false
+			pxy.proxy = nil
 			return
 		} else {
 			fmt.Printf("[proxyReceiver] receive buf: \n%s\n", hex.Dump(buf[:rsize]))
@@ -50,12 +48,14 @@ func proxyReceiver(proxy *net.TCPConn, pxToDv chan handling.Message) {
 	}
 }
 
-func proxyWriter(proxy *net.TCPConn, dvToPx chan handling.Message) {
+func proxyWriter(pxy *proxyStatus, dvToPx chan handling.Message) {
 	fmt.Println("[proxyWriter] start")
 
 	if buf, _ := registCM(); buf != nil {
-		if wsize, err := proxy.Write(buf); err != nil {
-			fmt.Println("[proxyWriter] write to Regist Proxy error: ", err)
+		if wsize, err := pxy.proxy.Write(buf); err != nil {
+			fmt.Println("[proxyWriter] write to Regist Proxy error: ", err, "back to connect")
+			pxy.connFlag = false
+			pxy.proxy = nil
 			return
 		} else {
 			fmt.Println("[proxyWriter] write to Regist Proxy success: ", wsize)
@@ -64,8 +64,10 @@ func proxyWriter(proxy *net.TCPConn, dvToPx chan handling.Message) {
 
 	for {
 		message := <-dvToPx
-		if wsize, err := proxy.Write(message.Buf); err != nil {
+		if wsize, err := pxy.proxy.Write(message.Buf); err != nil {
 			fmt.Println("[proxyWriter] write to Proxy error: ", err)
+			pxy.connFlag = false
+			pxy.proxy = nil
 			return
 		} else {
 			fmt.Println("[proxyWriter] write to Proxy success: ", wsize)
@@ -76,17 +78,24 @@ func proxyWriter(proxy *net.TCPConn, dvToPx chan handling.Message) {
 func Bridge(pxToDv chan handling.Message, dvToPx chan handling.Message, ip string, port int) {
 	fmt.Println("[bridge] start, remote addr: ", ip, port)
 
-	addr := net.TCPAddr{Port: port, IP: net.ParseIP(ip)}
-	proxy, err := net.DialTCP("tcp", nil, &addr)
-	if err != nil {
-		fmt.Println("[bridge] make bridge socket error: ", err)
-		os.Exit(1)
-	}
-
-	go proxyReceiver(proxy, pxToDv)
-	go proxyWriter(proxy, dvToPx)
+	pxy := proxyStatus{}
 
 	for {
+		if !pxy.connFlag {
+			addr := net.TCPAddr{Port: port, IP: net.ParseIP(ip)}
+			proxy, err := net.DialTCP("tcp", nil, &addr)
+			if err != nil {
+				fmt.Println("[bridge] make bridge socket error: ", err, " retry ...")
+				//os.Exit(1)
+			} else {
+				pxy.connFlag = true
+				pxy.proxy = proxy
+
+				go proxyReceiver(&pxy, pxToDv)
+				go proxyWriter(&pxy, dvToPx)
+			}
+		}
+
 		time.Sleep(1 * time.Second)
 	}
 }

@@ -27,6 +27,9 @@ func Get(key string) (interface{}, bool) {
 	if 0 >= len(key) {
 		return nil, false
 	}
+	if 0 >= len(chMgr) {
+		return nil, false
+	}
 
 	return chMgr[key], true
 }
