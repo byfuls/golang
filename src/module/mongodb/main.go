@@ -68,7 +68,7 @@ func main() {
 		fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 	}
 
-	// [INSERT} many]
+	// [INSERT} many
 	misty := Trainer{"Misty", 10, "Cerulean City"}
 	brock := Trainer{"Brock", 15, "Pewter City"}
 	trainers := []interface{}{misty, brock}
