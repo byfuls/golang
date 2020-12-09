@@ -1,0 +1,2 @@
+export GOPATH="/Users/byfuls/Lab/golang"
+export B_LOG="/Users/byfuls/Lab/golang/src/childProcess"

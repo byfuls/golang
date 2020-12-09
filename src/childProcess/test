@@ -1,0 +1,119 @@
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"syscall"
+	"time"
+
+	"childProcess/logging"
+)
+
+func childReader(bufReader *bufio.Reader) {
+	var buffer []byte = make([]byte, 128)
+	for {
+		_, err := bufReader.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				logging.ErrorF("[parent:%d] pipe has been closed\n", os.Getpid())
+				break
+			} else {
+				logging.ErrorF("[parent:%d] read content failed\n", os.Getpid())
+				break
+			}
+		} else {
+			logging.TraceF("[parent:%d] received msg: \n%s\n", os.Getpid(), hex.Dump(buffer))
+		}
+	}
+}
+
+func childWriter(bufWriter *bufio.Writer) {
+	i := 0
+	for {
+		buf := new(bytes.Buffer)
+		buf.Write([]byte("REPLY"))
+		if err := binary.Write(buf, binary.BigEndian, uint32(i)); err != nil {
+			logging.ErrorF("[parent:%d] binary write error: %s\n", os.Getpid(), err)
+			continue
+		}
+		logging.DebugF("[parent:%d] before write: \n%s\n", os.Getpid(), hex.Dump(buf.Bytes()))
+
+		if _, err := bufWriter.Write(buf.Bytes()); err != nil {
+			logging.ErrorF("[parent:%d] stdout error: %s\n", os.Getpid(), err)
+			return
+		}
+		bufWriter.Flush()
+		i++
+
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func main() {
+	if _loggingPath := os.Getenv("B_LOG"); len(_loggingPath) > 0 {
+		if !logging.Init(os.Getenv("B_LOG"), "parent_child.log") {
+			fmt.Println("logging init error")
+			panic("logging init error")
+		}
+	}
+
+	childProcess := exec.Command("./callChannel/callChannel", "1", "2", "3")
+	//pipeIn, err := childProcess.StdinPipe()
+	//pipeOut, err := childProcess.StdoutPipe()
+	//defer pipeIn.Close()
+	//defer pipeOut.Close()
+	//var bufWriter = bufio.NewWriter(pipeIn)
+	//var bufReader = bufio.NewReader(pipeOut)
+	//if err != nil {
+	//	logging.ErrorF("[parent:%d] create buffer io error: %s\n", os.Getpid(), err)
+	//	panic(err)
+	//}
+
+	if err := childProcess.Start(); err != nil {
+		panic(err)
+	}
+
+	//go childWriter(bufWriter)
+	//go childReader(bufReader)
+
+	go func() {
+		childProcess.Wait()
+		logging.TraceLn("wait complete")
+	}()
+
+	timeVal := 0
+	for {
+		time.Sleep(1 * time.Second)
+
+		if timeVal > 10 {
+			if err := stopProcess(childProcess); err != nil {
+				logging.ErrorF("[parent:%d] stop process error\n", os.Getpid())
+				//panic(err)
+			} /* else {
+				break
+			}*/
+			timeVal = 0
+		} else {
+			timeVal++
+		}
+	}
+}
+
+func stopProcess(cmd *exec.Cmd) error {
+	pro, err := os.FindProcess(cmd.Process.Pid)
+	if err != nil {
+		return err
+	}
+	err = pro.Signal(syscall.SIGINT)
+	if err != nil {
+		return err
+	}
+	logging.TraceF("[parent:%d] end child process %s success\n", os.Getpid(), cmd.Path)
+	return nil
+}
