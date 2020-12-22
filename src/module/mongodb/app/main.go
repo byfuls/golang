@@ -14,6 +14,7 @@ import (
 	//"reflect"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -26,6 +27,11 @@ type Trainer struct {
 
 type Test struct {
 	Name string
+}
+
+type id_t struct {
+	Id		primitive.ObjectID	`bson:"_id"`
+	Imsi	string				`bson:"imsi"`
 }
 
 type SimInfo struct {
@@ -66,7 +72,8 @@ type SimInfo struct {
 	//etc_msisdn_flag	number
 	//etc_charge_flag	number
 
-	Id                string
+	//Id                primitive.ObjectID `bson:"_id"`
+	Id                id_t		`bson:"_id"`
 	Imsi              string
 	Sim_pid           int
 	User_pid          int
@@ -147,15 +154,17 @@ func main() {
 	fmt.Println(collection)
 
 	// [FIND] one
-	filter := bson.D{{"_id.imsi", "5101025824020177"}}
+	filter := bson.D{{"_id.imsi", "510104842806848"}}
 	//filter := bson.D{{"name", "Ash"}}
 	var result SimInfo
 	//var result Trainer
 	//var result interface{}
 	if err := collection.FindOne(context.TODO(), filter).Decode(&result); err != nil {
+		fmt.Printf("err: %s\n", err)
 		log.Fatal(err)
 	} else {
 		fmt.Printf("Found a single document: %+v\n", result)
+		fmt.Printf("unique key imsi: %s\n", result.Id.Imsi)
 		//fmt.Println("===", result)
 		//fmt.Println("===!!!===", reflect.TypeOf(result.Sim_pid), reflect.ValueOf(result.Sim_pid))
 		//fmt.Println("===!!!===", reflect.TypeOf(result.Id), reflect.ValueOf(result.Id))
