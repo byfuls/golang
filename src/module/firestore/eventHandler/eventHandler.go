@@ -21,10 +21,21 @@ type EventHandler struct {
 	SnapShotDocs chan []EventA
 }
 
-func (e *EventHandler) UpdateDoc(coll string, docId string) {
-	fp := fmt.Sprintf("%s/%s", coll, docId)
-	ul, err := e.conn.Doc(fp).Update(e.ctx, []firestore.Update{
-		{Path: "flag", Value: "hihi"},
+func (e *EventHandler) AddDoc(collFullPath string, doc EventA) {
+	docRef, writeResult, error := e.conn.Collection(collFullPath).Add(e.ctx, doc)
+	if error != nil {
+		fmt.Println("add doc error: ", error)
+		fmt.Println("add doc error doc ref: ", docRef)
+		fmt.Println("add doc error write result: ", writeResult)
+	} else {
+		fmt.Println("add doc ok doc ref: ", docRef)
+		fmt.Println("add doc ok write result: ", writeResult)
+	}
+}
+
+func (e *EventHandler) UpdateDoc(docFullPath string, result string) {
+	ul, err := e.conn.Doc(docFullPath).Update(e.ctx, []firestore.Update{
+		{Path: "status", Value: result},
 	})
 	if err != nil {
 		fmt.Println("update error: ", err)
@@ -72,6 +83,7 @@ func (e *EventHandler) Snapshots(coll string) {
 				//fmt.Printf("doc: %+v\n", diff.Doc.Ref)
 
 				if diff.Kind != firestore.DocumentAdded {
+					fmt.Println("only added document will be proceed")
 					continue
 				}
 
