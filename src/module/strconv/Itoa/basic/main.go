@@ -9,7 +9,7 @@ import (
 
 func main() {
 	var i int
-	i = 3
+	i = 1234
 
 	tmp := strconv.Itoa(i)
 	tmpType := reflect.TypeOf(tmp)
