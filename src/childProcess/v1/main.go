@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"childProcess/child"
-	"childProcess/logging"
+	"childProcess/v1/child"
+	"childProcess/v1/logging"
 )
 
 func readFromChildPcs(cp *child.Process) {

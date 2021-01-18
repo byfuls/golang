@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"time"
+
+	"childProcess/v1/logging"
 )
 
 type bypassServer struct {
@@ -96,7 +98,8 @@ func (by *bypassServer) watcher(timeout int64) {
 			now := time.Now()
 			diff := int64(now.Sub(by.lastInTime) / time.Second)
 			if diff > timeout {
-				fmt.Printf("[watcher] timeout(%d)\n", diff)
+				//fmt.Printf("[watcher] timeout(%d)\n", diff)
+				logging.ErrorF("[watcher] timeout[IP:PORT](%d)\n", diff)
 				by.timeout <- true
 				return
 			}

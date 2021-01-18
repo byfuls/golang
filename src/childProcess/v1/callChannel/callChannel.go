@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"childProcess/callChannel/bypasser"
-	"childProcess/callChannel/ioCommunication"
-	"childProcess/logging"
+	"childProcess/v1/callChannel/bypasser"
+	"childProcess/v1/callChannel/ioCommunication"
+	"childProcess/v1/logging"
 )
 
 func pipeReader() {
@@ -32,7 +32,7 @@ func pipeWriter(timeoutSig chan bool) {
 	for {
 		tmout := <-timeoutSig
 		if tmout {
-			buf := []byte("TIMEOUT") // get sending data via channel
+			buf := []byte("TIMEOUT,1234:4321") // get sending data via channel
 			if len, err := ioCommunication.Write(buf); err != nil {
 				logging.ErrorLn("[pipeWriter] write error: ", err)
 				panic(err)
