@@ -36,11 +36,12 @@ func pipeWriter(timeoutSig chan bool) {
 		tmout := <-timeoutSig
 		if tmout {
 			/* inform timeout message to parent */
-			mediaAddressInfo := &mediaChannel.MediaMessage{
-				Head: "timeout",
-				Ip:   "",
-				Port: "",
-			}
+			//mediaAddressInfo := &mediaChannel.MediaMessage{
+			//	Head: "timeout",
+			//	Ip:   "",
+			//	Port: "",
+			//}
+			mediaAddressInfo := mediaChannel.GenerateMediaMessage("timeout", "", "", "")
 			mediaAddressByteArray, mediaAddressError := json.Marshal(mediaAddressInfo)
 			if mediaAddressError != nil {
 				logging.ErrorF("[pipeWriter] json marshal error\n")
