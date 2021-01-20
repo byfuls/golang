@@ -1,4 +1,4 @@
-package fcmSender
+package fcmHandler
 
 import (
 	"fmt"
@@ -6,21 +6,26 @@ import (
 	"github.com/NaySoftware/go-fcm"
 )
 
-type FcmHandler struct {
+type FcmSender struct {
 	ServerKey string
 	Ids       []string
-	Message   map[string][]byte
+	Message   map[string]interface{}
 
 	Fcm *fcm.FcmClient
 }
 
-func (f *FcmHandler) GenerateSend(ids []string, protocol []byte) (error, bool) {
+func (f *FcmSender) GenerateSend(ids []string, noti_title string, noti_body string, data_protocol []byte) (error, bool) {
 	if 0 >= len(ids) {
 		return nil, false
 	}
 
 	f.Ids = ids
-	f.Message["protocol"] = protocol
+	f.Message["title"] = noti_title
+	f.Message["body"] = noti_body
+	f.Message["data"] = map[string]interface{}{
+		"message":      data_protocol,
+		"click_action": "FLUTTER_NOTIFICATION_CLICK",
+	}
 
 	fmt.Println("dest: ", f.Ids)
 	fmt.Println("Message: ", f.Message)
@@ -37,13 +42,13 @@ func (f *FcmHandler) GenerateSend(ids []string, protocol []byte) (error, bool) {
 	return nil, true
 }
 
-func (f *FcmHandler) Init(serverKey string) bool {
+func (f *FcmSender) Init(serverKey string) bool {
 	if 0 >= len(serverKey) {
 		return false
 	}
 
 	f.ServerKey = serverKey
-	f.Message = make(map[string][]byte)
+	f.Message = make(map[string]interface{})
 	f.Fcm = fcm.NewFcmClient(f.ServerKey)
 
 	return true
