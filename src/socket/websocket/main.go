@@ -124,7 +124,7 @@ func main() {
 	mx := mux.NewRouter()
 
 	mx.HandleFunc("/login", login)
-	mx.HandleFunc("/monitor", monitor)
+	mx.HandleFunc("/", monitor)
 
 	http.Handle("/", mx)
 	http.ListenAndServe("127.0.0.1:2219", mx)
