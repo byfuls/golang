@@ -4,11 +4,13 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"web/session/model"
+	"strings"
+	"web/login_session/model"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/unrolled/render"
+	"github.com/urfave/negroni"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -25,7 +27,7 @@ func getSessionID(r *http.Request) string {
 		return ""
 	}
 
-	var := session.Values["id"]
+	val := session.Values["id"]
 	if val == nil {
 		return ""
 	}
@@ -79,17 +81,28 @@ func (a *AppHandler) Close() {
 }
 
 func CheckSignin(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// if request URL is /signin.html, then next()
+	if strings.Contains(r.URL.Path, "/signin") ||
+		strings.Contains(r.URL.Path, "/auth") {
+		next(w, r)
+		return
+	}
+
 	// if user already signed in => next(w, r)
+	sessionID := getSessionID(r)
+	if sessionID != "" {
+		next(w, r)
+		return
+	}
+
 	// if not user sign in => redirect sigin.html
+	http.Redirect(w, r, "/signin.html", http.StatusTemporaryRedirect)
 }
 
 func MakeHandler(filePath string) *AppHandler {
 	r := mux.NewRouter()
 
-	n := negroni.New(negroni.NewRecovery(),
-						negroni.NewLogger(),
-						negroni.HandlerFunc(CheckSigin),
-						negroni.NewStatic(http.Dir("public")))
+	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger(), negroni.HandlerFunc(CheckSignin), negroni.NewStatic(http.Dir("public")))
 	n.UseHandler(r)
 
 	a := &AppHandler{

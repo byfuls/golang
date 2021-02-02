@@ -19,7 +19,7 @@ import (
 type GoogleUserId struct {
 	ID            string `json:"id"`
 	Email         string `json:"email"`
-	VerifiedEmail string `json:"verified_email"`
+	VerifiedEmail bool   `json:"verified_email"`
 	Picture       string `json:"picture"`
 }
 
@@ -71,7 +71,7 @@ func googleAuthCallback(w http.ResponseWriter, r *http.Request) {
 
 	// Store ID info into Session Cookie
 	var userInfo GoogleUserId
-	err := json.Unmarshal(data, &userInfo)
+	err = json.Unmarshal(data, &userInfo)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
