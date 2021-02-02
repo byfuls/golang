@@ -5,8 +5,8 @@ import "net/http"
 type DecoratorFunc func(http.ResponseWriter, *http.Request, http.Handler)
 
 type DecoHandler struct {
-	fn DecoratorFunc
 	h  http.Handler
+	fn DecoratorFunc
 }
 
 func (self *DecoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +15,7 @@ func (self *DecoHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func NewDecoHandler(h http.Handler, fn DecoratorFunc) http.Handler {
 	return &DecoHandler{
-		fn: fn,
 		h:  h,
+		fn: fn,
 	}
 }
