@@ -9,14 +9,18 @@ import (
 	"os"
 	"strconv"
 	"testing"
-	"web/login_session_oneClientID/model"
+	"web/login_session_perClientID/model"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTodos(t *testing.T) {
+	getSessionID = func(r *http.Request) string {
+		return "testSessionID"
+	}
+
 	os.Remove("./test.db")
-	ah := MakeHandler()
+	ah := MakeHandler("./test.db")
 	defer ah.Close()
 
 	ts := httptest.NewServer(ah)

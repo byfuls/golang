@@ -1,11 +1,12 @@
 package app
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"web/login_session_oneClientID/model"
+	"web/login_session_perClientID/model"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -21,8 +22,9 @@ type AppHandler struct {
 	db model.DBHandler
 }
 
-func getSessionID(r *http.Request) string {
+var getSessionID = func(r *http.Request) string {
 	session, err := store.Get(r, "session")
+	log.Println("[getSessionID] session: ", session)
 	if err != nil {
 		return ""
 	}
@@ -39,13 +41,15 @@ func (a *AppHandler) indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *AppHandler) getTodoListHandler(w http.ResponseWriter, r *http.Request) {
-	list := a.db.GetTodos()
+	sessionID := getSessionID(r)
+	list := a.db.GetTodos(sessionID)
 	rd.JSON(w, http.StatusOK, list)
 }
 
 func (a *AppHandler) addTodoHandler(w http.ResponseWriter, r *http.Request) {
+	sessionID := getSessionID(r)
 	name := r.FormValue("name")
-	todo := a.db.AddTodo(name)
+	todo := a.db.AddTodo(sessionID, name)
 	rd.JSON(w, http.StatusCreated, todo)
 }
 
