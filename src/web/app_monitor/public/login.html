@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">   <!-- 검색 엔진 고려 -->
+    <meta name="basic html" content="html 기본 구조">   <!-- 해당 문서의 키워드 -->
+    <meta name="description" content="html5를 통해 웹 표준 공부하기"> <!-- 해당 문서의 설명 -->
+    <meta name="author" content="byfuls"> <!-- 해당 문서의 소유자 또는 제작자 -->
+
+    <title>Monitor</title>
+
+    <!-- Bootstrap CSS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <style>
+        button {
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: 1px solid black;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .login-container {
+            padding: 16px;
+        }
+        input[type=text], input[type=password] {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+    </style>
+    <script src="login.js"></script>
+ </head>
+ <body>
+    <div class="container">
+        <form action="" method="post" class="login-container">
+            <fieldset>
+                <legend>
+                    Login
+                </legend>
+
+                <label for="id">id</label>
+                <input type="text" name="id" id="id" placeholder="enter id" required autofocus>
+
+                <label for="password">password</label>
+                <input type="password" name="password" id="password" placeholder="enter password" required>
+
+                <button type="submit" id="submit">Login</button>
+            </fieldset>
+        </form>
+    </div>
+ </body>
+ </html>

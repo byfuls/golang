@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">   <!-- 검색 엔진 고려 -->
+    <meta name="basic html" content="html 기본 구조">   <!-- 해당 문서의 키워드 -->
+    <meta name="description" content="html5를 통해 웹 표준 공부하기"> <!-- 해당 문서의 설명 -->
+    <meta name="author" content="byfuls"> <!-- 해당 문서의 소유자 또는 제작자 -->
+
+    <title>Monitor</title>
+
+    <!-- Bootstrap CSS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+    <style>
+        table {
+            width: 100%;
+            border: 1px solid black;
+            border-collapse: collapse;
+            margin: 2% 0;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+        }
+        #table-no {
+            width: 3%;
+        }
+        #table-serialNo {
+            width: 8%;
+        }
+        #table-imsi {
+            width: 18%;
+        }
+        #table-status {
+            width: 20%;
+        }
+        #status {
+            padding-left: 2%;
+            text-align: left;
+        }
+        #table-usedTime, #table-lastReceivedTime {
+            width: auto;
+        }
+        #table-watchDog {
+            width: 10%;
+        }
+    </style>
+    <script src="monitor.js"></script>
+ </head>
+ <body>
+    <div class="container">
+        <button type="button" id="monitorOnceButton">
+            once
+        </button>
+        <button type="button" id="monitorStartButton">
+            start
+        </button>
+        <button type="button" id="monitorStopButton">
+            stop
+        </button>
+        <table>
+            <thead>
+                <tr>
+                    <th id="table-no">
+                        No.
+                    </th>
+                    <th id="table-serialNo">
+                        Serial No
+                    </th>
+                    <th id="table-imsi">
+                        IMSI
+                    </th>
+                    <th id="table-status">
+                        Status
+                    </th>
+                    <th id="table-usedTime">
+                        Used Time
+                    </th>
+                    <th id="table-lastReceivedTime">
+                        Last Received Time
+                    </th>
+                    <th id="table-watchDog">
+                        WatchDog On/Off
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        1
+                    </td>
+                    <td id="serialNo">
+                    </td>
+                    <td id="userImsi">
+                    </td>
+                    <td id="status">
+                    </td>
+                    <td id="usedTime">
+                    </td>
+                    <td id="lastReceivedTime">
+                    </td>
+                    <td id="watchDogOn">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+ </body>
+ </html>
