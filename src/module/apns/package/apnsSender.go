@@ -22,6 +22,8 @@ func (a *ApnsSender) processor(index int) {
 	for {
 		pn := <-a.deliverChan
 
+		log.Printf("[apns/processor:%d] ready to send\n", index)
+
 		client := apns.NewClient(a.ApnsGateway, a.CertKeyPath, a.CertKeyPath)
 		resp := client.Send(pn)
 		if resp.Success == false {
@@ -29,11 +31,11 @@ func (a *ApnsSender) processor(index int) {
 			continue
 		}
 
-		sendingMsg, _ := pn.PayloadString()
+		//sendingMsg, _ := pn.PayloadString()
 
-		log.Printf("[apns/processor:%d] Alert  : %v\n", index, sendingMsg)
+		//log.Printf("[apns/processor:%d] Alert  : %v\n", index, sendingMsg)
 		log.Printf("[apns/processor:%d] Success: %v\n", index, resp.Success)
-		log.Printf("[apns/processor:%d] Error  : %v\n", index, resp.Error)
+		//log.Printf("[apns/processor:%d] Error  : %v\n", index, resp.Error)
 	}
 }
 
