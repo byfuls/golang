@@ -1,16 +1,17 @@
-package main
+package channelMonitor
 
 import (
 	"net/http"
+	"os"
 
-	"web/app_monitor/router"
+	"program/cm/channelMonitor/router"
 )
 
-func main() {
-	m := router.MakeHandler("./database/user.db")
+func Open() {
+	m := router.MakeHandler(os.Getenv("COMMON_SRC") + "/cm/channelMonitor/database/user.db")
 	defer m.Close()
 
-	err := http.ListenAndServe("localhost:2219", m)
+	err := http.ListenAndServe(":2219", m)
 	if err != nil {
 		panic(err)
 	}

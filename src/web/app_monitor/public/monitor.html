@@ -13,6 +13,18 @@
     <!-- Bootstrap CSS -->
     <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
     <style>
+		.status-table {
+            width: 100%;
+            border: none !important;
+            border-collapse: collapse;
+            margin: 2% 0;
+            table-layout: fixed;
+		}
+		.status-th, .status-td {
+			font-size: .8rem;
+            border: none !important;
+			padding-bottom: 5%;
+		}
         table {
             width: 100%;
             border: 1px solid black;
@@ -37,8 +49,7 @@
             width: 20%;
         }
         #status {
-            padding-left: 2%;
-            text-align: left;
+            text-align: center;
         }
         #table-usedTime, #table-lastReceivedTime {
             width: auto;
@@ -86,24 +97,7 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        1
-                    </td>
-                    <td id="serialNo">
-                    </td>
-                    <td id="userImsi">
-                    </td>
-                    <td id="status">
-                    </td>
-                    <td id="usedTime">
-                    </td>
-                    <td id="lastReceivedTime">
-                    </td>
-                    <td id="watchDogOn">
-                    </td>
-                </tr>
+			<tbody class="channelList">
             </tbody>
         </table>
     </div>

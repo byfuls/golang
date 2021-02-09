@@ -22,6 +22,7 @@ func checkLogined(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 	}
 
 	sessionID := getSessionID(r)
+	log.Println("[checkLogined] sessionID: ", sessionID)
 	if sessionID != "" {
 		next(w, r)
 		return

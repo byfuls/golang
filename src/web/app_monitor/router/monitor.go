@@ -3,12 +3,13 @@ package router
 import (
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/websocket"
 
-	"web/app_monitor/package/statusFlags"
+	"program/cm/channelManager"
+
+	"package/statusFlags"
 )
 
 var upgrader = websocket.Upgrader{
@@ -64,18 +65,16 @@ type message struct {
 
 func all(r *message) message {
 	allData := []*monitorStatusInfo{}
-
-	var count = 1 // TEST
-	for i := 0; i < count; i++ {
+	channelLists := channelManager.ShowAllChannelList()
+	for i, channel := range channelLists {
 		data := new(monitorStatusInfo)
-
 		data.Index = i
-		data.Count = count
-		data.SerialNo = "serial no:" + strconv.Itoa(i)
-		data.UserImsi = "user imsi:" + strconv.Itoa(i)
-		data.UsedTime = time.Now()
-		data.LastReceivedTime = time.Now()
-		data.WatchDogOn = false
+		data.Count = len(channelLists)
+		data.SerialNo = channel.SerialNo
+		data.UserImsi = channel.UserImsi
+		data.UsedTime = channel.UsedTime
+		data.LastReceivedTime = channel.LastReceivedTime
+		data.WatchDogOn = channel.WatchDogOn
 
 		status := statusFlags.Status{}
 		for _, flag := range []statusFlags.Bits{
@@ -126,12 +125,12 @@ func monitoring(conn *websocket.Conn, r *http.Request) {
 			log.Println("[monitorHandler] read error: ", err)
 			return
 		} else {
-			log.Println("[monitorHandler] read ok: ", m)
-			log.Println("[monitorHandler] command   : ", m.Command)
-			log.Println("[monitorHandler] subCommand: ", m.SubCommand)
-			log.Println("[monitorHandler] result    : ", m.Result)
-			log.Println("[monitorHandler] resultMsg : ", m.ResultMsg)
-			log.Println("[monitorHandler] data      : ", m.Data)
+			//log.Println("[monitorHandler] read ok: ", m)
+			//log.Println("[monitorHandler] command   : ", m.Command)
+			//log.Println("[monitorHandler] subCommand: ", m.SubCommand)
+			//log.Println("[monitorHandler] result    : ", m.Result)
+			//log.Println("[monitorHandler] resultMsg : ", m.ResultMsg)
+			//log.Println("[monitorHandler] data      : ", m.Data)
 
 			var data message
 			data = all(m)
@@ -140,7 +139,7 @@ func monitoring(conn *websocket.Conn, r *http.Request) {
 				log.Println("[monitorHandler] write error: ", err)
 				return
 			} else {
-				log.Println("[monitorHandler] write ok: ", m)
+				//log.Println("[monitorHandler] write ok: ", m)
 			}
 		}
 	}

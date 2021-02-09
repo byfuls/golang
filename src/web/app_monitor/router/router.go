@@ -3,12 +3,13 @@ package router
 import (
 	"net/http"
 	"os"
-	"web/app_monitor/model"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/unrolled/render"
 	"github.com/urfave/negroni"
+
+	"program/cm/channelMonitor/model"
 )
 
 var (
@@ -48,7 +49,7 @@ func MakeHandler(databaseFilePath string) *RouterHandler {
 	n := negroni.New(negroni.NewRecovery(),
 		negroni.NewLogger(),
 		negroni.HandlerFunc(checkLogined),
-		negroni.NewStatic(http.Dir("public")))
+		negroni.NewStatic(http.Dir(os.Getenv("COMMON_SRC")+"/cm/channelMonitor/public")))
 	n.UseHandler(m)
 
 	handler := &RouterHandler{
