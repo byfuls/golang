@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package config;
+
+service mediaChannelLauncher {
+    rpc LaunchMedialChannel (MediaChannelRequest) returns (MediaChannelResponse);
+}
+
+message MediaChannelRequest {
+    string command = 1;
+}
+
+message MediaChannelResponse {
+    string address = 1;
+}
