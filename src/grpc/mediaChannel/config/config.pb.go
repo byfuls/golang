@@ -7,10 +7,6 @@
 package config
 
 import (
-	context "context"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -118,6 +114,116 @@ func (x *MediaChannelResponse) GetAddress() string {
 	return ""
 }
 
+type MediaChannelStreamRequestMessage struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+}
+
+func (x *MediaChannelStreamRequestMessage) Reset() {
+	*x = MediaChannelStreamRequestMessage{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_config_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MediaChannelStreamRequestMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MediaChannelStreamRequestMessage) ProtoMessage() {}
+
+func (x *MediaChannelStreamRequestMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_config_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MediaChannelStreamRequestMessage.ProtoReflect.Descriptor instead.
+func (*MediaChannelStreamRequestMessage) Descriptor() ([]byte, []int) {
+	return file_config_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *MediaChannelStreamRequestMessage) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type MediaChannelStreamResponseMessage struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id      string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Type    string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Message string `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
+}
+
+func (x *MediaChannelStreamResponseMessage) Reset() {
+	*x = MediaChannelStreamResponseMessage{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_config_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MediaChannelStreamResponseMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MediaChannelStreamResponseMessage) ProtoMessage() {}
+
+func (x *MediaChannelStreamResponseMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_config_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MediaChannelStreamResponseMessage.ProtoReflect.Descriptor instead.
+func (*MediaChannelStreamResponseMessage) Descriptor() ([]byte, []int) {
+	return file_config_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *MediaChannelStreamResponseMessage) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *MediaChannelStreamResponseMessage) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *MediaChannelStreamResponseMessage) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_config_proto protoreflect.FileDescriptor
 
 var file_config_proto_rawDesc = []byte{
@@ -128,14 +234,31 @@ var file_config_proto_rawDesc = []byte{
 	0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x22, 0x30, 0x0a, 0x14, 0x4d, 0x65, 0x64, 0x69, 0x61,
 	0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
 	0x18, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x32, 0x68, 0x0a, 0x14, 0x6d, 0x65, 0x64,
-	0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x4c, 0x61, 0x75, 0x6e, 0x63, 0x68, 0x65,
-	0x72, 0x12, 0x50, 0x0a, 0x13, 0x4c, 0x61, 0x75, 0x6e, 0x63, 0x68, 0x4d, 0x65, 0x64, 0x69, 0x61,
-	0x6c, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x1b, 0x2e, 0x63, 0x6f, 0x6e, 0x66, 0x69,
-	0x67, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x4d,
-	0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x22, 0x32, 0x0a, 0x20, 0x4d, 0x65, 0x64,
+	0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x12, 0x0e, 0x0a,
+	0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x61, 0x0a,
+	0x21, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x53, 0x74, 0x72,
+	0x65, 0x61, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
+	0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x04, 0x74, 0x79, 0x70, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
+	0x32, 0xd6, 0x01, 0x0a, 0x14, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65,
+	0x6c, 0x4c, 0x61, 0x75, 0x6e, 0x63, 0x68, 0x65, 0x72, 0x12, 0x4f, 0x0a, 0x12, 0x4c, 0x61, 0x75,
+	0x6e, 0x63, 0x68, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12,
+	0x1b, 0x2e, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68,
+	0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x63,
+	0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e,
+	0x65, 0x6c, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x6d, 0x0a, 0x12, 0x53, 0x74,
+	0x72, 0x65, 0x61, 0x6d, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c,
+	0x12, 0x28, 0x2e, 0x63, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43,
+	0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x1a, 0x29, 0x2e, 0x63, 0x6f, 0x6e,
+	0x66, 0x69, 0x67, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c,
+	0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x4d, 0x65,
+	0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x00, 0x30, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -150,16 +273,20 @@ func file_config_proto_rawDescGZIP() []byte {
 	return file_config_proto_rawDescData
 }
 
-var file_config_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_config_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_config_proto_goTypes = []interface{}{
-	(*MediaChannelRequest)(nil),  // 0: config.MediaChannelRequest
-	(*MediaChannelResponse)(nil), // 1: config.MediaChannelResponse
+	(*MediaChannelRequest)(nil),               // 0: config.MediaChannelRequest
+	(*MediaChannelResponse)(nil),              // 1: config.MediaChannelResponse
+	(*MediaChannelStreamRequestMessage)(nil),  // 2: config.MediaChannelStreamRequestMessage
+	(*MediaChannelStreamResponseMessage)(nil), // 3: config.MediaChannelStreamResponseMessage
 }
 var file_config_proto_depIdxs = []int32{
-	0, // 0: config.mediaChannelLauncher.LaunchMedialChannel:input_type -> config.MediaChannelRequest
-	1, // 1: config.mediaChannelLauncher.LaunchMedialChannel:output_type -> config.MediaChannelResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 0: config.mediaChannelLauncher.LaunchMediaChannel:input_type -> config.MediaChannelRequest
+	2, // 1: config.mediaChannelLauncher.StreamMediaChannel:input_type -> config.MediaChannelStreamRequestMessage
+	1, // 2: config.mediaChannelLauncher.LaunchMediaChannel:output_type -> config.MediaChannelResponse
+	3, // 3: config.mediaChannelLauncher.StreamMediaChannel:output_type -> config.MediaChannelStreamResponseMessage
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -195,6 +322,30 @@ func file_config_proto_init() {
 				return nil
 			}
 		}
+		file_config_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MediaChannelStreamRequestMessage); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_config_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MediaChannelStreamResponseMessage); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -202,7 +353,7 @@ func file_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_config_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -214,84 +365,4 @@ func file_config_proto_init() {
 	file_config_proto_rawDesc = nil
 	file_config_proto_goTypes = nil
 	file_config_proto_depIdxs = nil
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConnInterface
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
-
-// MediaChannelLauncherClient is the client API for MediaChannelLauncher service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type MediaChannelLauncherClient interface {
-	LaunchMedialChannel(ctx context.Context, in *MediaChannelRequest, opts ...grpc.CallOption) (*MediaChannelResponse, error)
-}
-
-type mediaChannelLauncherClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewMediaChannelLauncherClient(cc grpc.ClientConnInterface) MediaChannelLauncherClient {
-	return &mediaChannelLauncherClient{cc}
-}
-
-func (c *mediaChannelLauncherClient) LaunchMedialChannel(ctx context.Context, in *MediaChannelRequest, opts ...grpc.CallOption) (*MediaChannelResponse, error) {
-	out := new(MediaChannelResponse)
-	err := c.cc.Invoke(ctx, "/config.mediaChannelLauncher/LaunchMedialChannel", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// MediaChannelLauncherServer is the server API for MediaChannelLauncher service.
-type MediaChannelLauncherServer interface {
-	LaunchMedialChannel(context.Context, *MediaChannelRequest) (*MediaChannelResponse, error)
-}
-
-// UnimplementedMediaChannelLauncherServer can be embedded to have forward compatible implementations.
-type UnimplementedMediaChannelLauncherServer struct {
-}
-
-func (*UnimplementedMediaChannelLauncherServer) LaunchMedialChannel(context.Context, *MediaChannelRequest) (*MediaChannelResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LaunchMedialChannel not implemented")
-}
-
-func RegisterMediaChannelLauncherServer(s *grpc.Server, srv MediaChannelLauncherServer) {
-	s.RegisterService(&_MediaChannelLauncher_serviceDesc, srv)
-}
-
-func _MediaChannelLauncher_LaunchMedialChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MediaChannelRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MediaChannelLauncherServer).LaunchMedialChannel(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/config.mediaChannelLauncher/LaunchMedialChannel",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MediaChannelLauncherServer).LaunchMedialChannel(ctx, req.(*MediaChannelRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _MediaChannelLauncher_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "config.mediaChannelLauncher",
-	HandlerType: (*MediaChannelLauncherServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "LaunchMedialChannel",
-			Handler:    _MediaChannelLauncher_LaunchMedialChannel_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "config.proto",
 }

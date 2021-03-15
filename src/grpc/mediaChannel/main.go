@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	_ "io"
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
 
@@ -19,10 +21,32 @@ type server struct {
 	pb.UnimplementedMediaChannelLauncherServer
 }
 
-func (s *server) LaunchMedialChannel(ctx context.Context, in *pb.MediaChannelRequest) (*pb.MediaChannelResponse, error) {
+func (s *server) LaunchMediaChannel(ctx context.Context, in *pb.MediaChannelRequest) (*pb.MediaChannelResponse, error) {
 	log.Printf("[server] received: %v\n", in.GetCommand())
 
 	return &pb.MediaChannelResponse{Address: "get command: " + in.GetCommand()}, nil
+}
+
+func (s *server) StreamMediaChannel(in *pb.MediaChannelStreamRequestMessage, srv pb.MediaChannelLauncher_StreamMediaChannelServer) error {
+
+	log.Println("[server] stream response for id: ", in.Id)
+
+	for {
+		time.Sleep(5 * time.Second)
+		resp := pb.MediaChannelStreamResponseMessage{
+			Id:      "test",
+			Type:    "type",
+			Message: "message",
+		}
+		if err := srv.Send(&resp); err != nil {
+			log.Println("[server] send error: %v\n", err)
+			return err
+		}
+
+		log.Println("[server] ing...")
+	}
+
+	return nil
 }
 
 func main() {

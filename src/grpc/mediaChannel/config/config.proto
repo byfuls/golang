@@ -3,7 +3,8 @@ syntax = "proto3";
 package config;
 
 service mediaChannelLauncher {
-    rpc LaunchMedialChannel (MediaChannelRequest) returns (MediaChannelResponse);
+    rpc LaunchMediaChannel (MediaChannelRequest) returns (MediaChannelResponse);
+	rpc StreamMediaChannel (MediaChannelStreamRequestMessage) returns (stream MediaChannelStreamResponseMessage) {}
 }
 
 message MediaChannelRequest {
@@ -12,4 +13,14 @@ message MediaChannelRequest {
 
 message MediaChannelResponse {
     string address = 1;
+}
+
+message MediaChannelStreamRequestMessage {
+	string id = 1;
+}
+
+message MediaChannelStreamResponseMessage {
+	string id = 1;
+    string type = 2;
+    string message = 3;
 }
