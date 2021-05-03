@@ -1,35 +1,54 @@
 package statusFlags
 
-type Bits uint16
+type UByte uint8
+type UShort uint16
 
 const (
-	AlterUser       Bits = 1 << iota /* 1 */
-	LurUpRequest                     /* 2 */
-	SmsSendRequest                   /* 4 */
-	CallSendRequest                  /* 8 */
-	CallDropRequest                  /* 16 */
+	/*_______________LOBYTE_________________*/
+	AlterUser       UShort = 1 << iota /* 1 */
+	LurUpRequest                       /* 2 */
+	SmsSend                            /* 4 */
+	Call                               /* 8 */
+	CallDrop                           /* 16 */
+	PagingRequest                      /* 32 */
+	CallRecvRequest                    /* 64 */
+	/*_______________HIBYTE_________________*/
+	_
+	Idle   /* 128 */
+	Active /* 256 */
+	Search /* 512 */
 )
 
 type Status struct {
-	val Bits
+	val UShort
+	hi  UByte
+	lo  UByte
 }
 
-func (s *Status) Set(flag Bits) {
+func (s *Status) Set(flag UShort) {
 	s.val = s.val | flag
 }
 
-func (s *Status) Clear(flag Bits) {
+func (s *Status) Clear(flag UShort) {
 	s.val = s.val &^ flag
 }
 
-func (s *Status) Toggle(flag Bits) {
+func (s *Status) Toggle(flag UShort) {
 	s.val = s.val ^ flag
 }
 
-func (s *Status) Has(flag Bits) bool {
+func (s *Status) Has(flag UShort) bool {
 	return s.val&flag != 0
 }
 
-func (s *Status) Val() Bits {
+func (s *Status) SetVal(val UShort) {
+	s.val = val
+}
+
+func (s *Status) GetVal() UShort {
 	return s.val
+}
+
+func (s *Status) AllClear() {
+	s.val = 0
 }
