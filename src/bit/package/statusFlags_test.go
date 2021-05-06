@@ -5,68 +5,48 @@ import (
 	"testing"
 )
 
-func ShowBitStatus(s *Status) {
+func ShowBitValue(s *Status) {
 	fmt.Println("__________________________")
-	fmt.Println("AlterUser?       ", s.Has(AlterUser))
-	fmt.Println("LurUpRequest?    ", s.Has(LurUpRequest))
-	fmt.Println("SmsSend?         ", s.Has(SmsSend))
-	fmt.Println("Call?            ", s.Has(Call))
-	fmt.Println("CallDrop?        ", s.Has(CallDrop))
-	fmt.Println("PagingRequest?   ", s.Has(PagingRequest))
-	fmt.Println("CallRecvRequest? ", s.Has(CallRecvRequest))
-	fmt.Println("Idle?            ", s.Has(Idle))
-	fmt.Println("Active?          ", s.Has(Active))
-	fmt.Println("Search?          ", s.Has(Search))
+	fmt.Println("Eat    :    ", Eat)
+	fmt.Println("Sleep  :    ", Sleep)
+	fmt.Println("Sing   :    ", Sing)
+	fmt.Println("Play   :    ", Play)
+	fmt.Println("Call   :    ", Call)
+	fmt.Println("Sms    :    ", Sms)
+	fmt.Println("Shower :    ", Shower)
+	fmt.Println("Work   :    ", Work)
+	fmt.Println("Health :    ", Health)
 	fmt.Println("__________________________")
 }
 
+func ShowBitStatus(s *Status) {
+	fmt.Println("__________________________")
+	fmt.Println("Eat    :    ", s.Has(Eat))
+	fmt.Println("Sleep  :    ", s.Has(Sleep))
+	fmt.Println("Sing   :    ", s.Has(Sing))
+	fmt.Println("Play   :    ", s.Has(Play))
+	fmt.Println("Call   :    ", s.Has(Call))
+	fmt.Println("Sms    :    ", s.Has(Sms))
+	fmt.Println("Shower :    ", s.Has(Shower))
+	fmt.Println("Work   :    ", s.Has(Work))
+	fmt.Println("Health :    ", s.Has(Health))
+	fmt.Println("__________________________")
+	fmt.Println("high byte value : ", s.GetValHigh())
+	fmt.Println("low byte value  : ", s.GetValLow())
+}
+
 func TestMain(t *testing.T) {
-	fmt.Println(AlterUser)
-	fmt.Println(Idle)
-	fmt.Println(Active)
-	fmt.Println(Search)
-
-	fmt.Println("_________________")
 	s := Status{}
-	s.Toggle(Idle)
+
+	/* 초기 상태 확인 */
+	ShowBitValue(&s)
 	ShowBitStatus(&s)
 
-	s.Toggle(LurUpRequest)
+	/* 비트 반전 후 상태 확인 */
+	s.Toggle(Play)
 	ShowBitStatus(&s)
 
-	s.Toggle(LurUpRequest)
+	/* 비트 반전 후 상태 확인 */
+	s.Toggle(Work)
 	ShowBitStatus(&s)
-
-	/*
-		s := Status{}
-		fmt.Println(s.GetVal())
-
-		s.Toggle(AlterUser)
-		fmt.Println("___________________")
-		for i, flag := range []Bits{AlterUser, LurUpRequest, SmsSend, Call, CallDrop} {
-			fmt.Println(i, s.Has(flag))
-		}
-
-		s.Toggle(SmsSend)
-		fmt.Println("___________________")
-		for i, flag := range []Bits{AlterUser, LurUpRequest, SmsSend, Call, CallDrop} {
-			fmt.Println(i, s.Has(flag))
-		}
-
-		fmt.Println("___________________")
-		fmt.Println("check: ", s.Has(AlterUser))
-		fmt.Println("check: ", s.Has(SmsSend))
-		fmt.Println("val: ", s.GetVal())
-
-		s.Toggle(SmsSend)
-		fmt.Println("___________________")
-		for i, flag := range []Bits{AlterUser, LurUpRequest, SmsSend, Call, CallDrop} {
-			fmt.Println(i, s.Has(flag))
-		}
-
-		fmt.Println("___________________")
-		fmt.Println("check: ", s.Has(AlterUser))
-		fmt.Println("check: ", s.Has(SmsSend))
-		fmt.Println("val: ", s.GetVal())
-	*/
 }
