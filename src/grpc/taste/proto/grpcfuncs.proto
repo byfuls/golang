@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package proto;
+
+service gRPCFuncsList {
+    rpc sum (SumArgs) returns (SumReturns);
+}
+
+message SumArgs {
+    int32 value1 = 1;
+    int32 value2 = 2;
+}
+
+message SumReturns {
+    int32 value = 1; 
+}
