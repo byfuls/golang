@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package proto;
+option go_package="../generate/proto";
+
+service ProtoParam {
+    rpc PostStressUp (ProtoRequest) returns (ProtoResponse);
+}
+
+message ProtoRequest {
+    string pid = 1;
+    string gateId = 2;
+}
+
+message ProtoResponse {
+    int64 totalStress = 1;
+}

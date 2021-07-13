@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-var ADDRESS = "127.0.0.1:10000"
+var ADDRESS = "127.0.0.1:1234"
 
 func echo(client net.Conn) {
 	// --1
@@ -30,7 +30,7 @@ func echo(client net.Conn) {
 			fmt.Println("read err: ", err)
 			return
 		}
-		fmt.Println(buf)
+		//fmt.Println(buf)
 		client.Write(buf)
 	}
 }
