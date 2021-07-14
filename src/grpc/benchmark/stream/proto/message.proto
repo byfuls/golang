@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package message;
+option go_package="../generate/message";
+
+service MessageStream {
+    rpc StreamWriter(stream ReqPkt) returns (ResPkt);
+}
+
+message ReqPkt {
+    string command = 1;
+}
+
+message ResPkt {
+    string result = 1;
+}
