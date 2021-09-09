@@ -12,4 +12,17 @@ func main() {
 	low := val & 0xff
 	fmt.Println("high: ", high)
 	fmt.Println("low : ", low)
+
+	////////////////////////////
+	fmt.Println("////////")
+	////////////////////////////
+
+	var test uint8 = 0xff
+	fmt.Printf("%08b\n", test)
+
+	test<<=1
+	fmt.Printf("%08b\n", test)
+
+	test<<=1
+	fmt.Printf("%08b\n", test)
 }
