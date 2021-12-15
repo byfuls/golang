@@ -15,5 +15,6 @@ func main() {
     dt := time.Now()
     dtn := time.Now().Add(time.Duration(n) * time.Second)
     fmt.Printf("current time : %s\n", dt.Format("2006-01-02 15:04:05"))
+    fmt.Printf("current time : %s\n", dt.Format("15:04:05"))
     fmt.Printf("current timen: %s\n", dtn.Format("2006-01-02 15:04:05"))
 }
