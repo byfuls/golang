@@ -1,14 +1,15 @@
 package main
+
 //package channelManager
 
 import (
 	"container/list"
-	"sync"
 	"fmt"
+	"sync"
 )
 
 type channelInfo struct {
-	key string
+	key    string
 	status int
 }
 
@@ -41,14 +42,14 @@ func Remove(key string) bool {
 }
 
 func ShowAll() {
-	fmt.Println("start")
+	fmt.Println("___ showall - start ___")
 	defer mutex.Unlock()
 	mutex.Lock()
 	for e := channelList.Front(); e != nil; e = e.Next() {
 		tmp := e.Value.(*channelInfo)
-		fmt.Println(tmp)
+		fmt.Printf("key[%v] status[%v]\n", tmp.key, tmp.status)
 	}
-	fmt.Println("end")
+	fmt.Println("_____ end _____")
 }
 
 func GetOne() (string, bool) {
@@ -85,12 +86,11 @@ func main() {
 	Pushback("321")
 	//ShowAll()
 
-	//fmt.Println(GetOne())
-	//fmt.Println(GetOne())
-	//fmt.Println(GetOne())
-	//ShowAll()
-	//fmt.Println(ReturnOne("123"))
+	fmt.Println("get one >> ")
+	fmt.Println(GetOne())
 	ShowAll()
-	fmt.Println(Remove("123"))
+	fmt.Println(ReturnOne("123"))
+	ShowAll()
+	Remove("123")
 	ShowAll()
 }
