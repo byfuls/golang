@@ -3,7 +3,7 @@ package dfs
 // Leetcode 733 - Flood Fill
 // URL : https://leetcode.com/problems/flood-fill/description/
 
-func Q733floodFill(image [][]int, sr int, sc int, newColor int) [][]int {
+func floodFill(image [][]int, sr int, sc int, newColor int) [][]int {
 	var originColor = image[sr][sc]
 	if originColor == newColor {
 		return image

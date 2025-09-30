@@ -1,8 +1,6 @@
-package dfs
+package bfs
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestFloodFill(t *testing.T) {
 	var (
